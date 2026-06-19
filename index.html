@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Kerja Harian</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f0f4f8;
+  --surface:#ffffff;
+  --surface2:#f8fafc;
+  --surface3:#e2e8f0;
+  --border:#cbd5e1;
+  --border2:#94a3b8;
+  --accent:#0284c7;
+  --accent2:#0369a1;
+  --blue:#2563eb;
+  --green:#16a34a;
+  --red:#dc2626;
+  --yellow:#ca8a04;
+  --orange:#ea580c;
+  --orange2:#c2410c;
+  --tp:#0f172a;
+  --ts:#475569;
+  --tm:#64748b;
+  --r:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);color:var(--tp);font-family:'DM Sans',sans-serif;}
+body{display:flex;flex-direction:column;min-height:100vh;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--surface2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ══════════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════════ */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;flex-direction:column;gap:0;
+}
+#login-screen.hidden{display:none;}
+.login-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:40px 36px;width:100%;max-width:420px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.08);
+}
+.login-logo{
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;margin-bottom:32px;
+}
+.login-logo-icon{
+  width:56px;height:56px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;box-shadow:0 8px 20px rgba(2,132,199,0.25);
+  background:var(--accent);color:#fff;
+  transition:background .3s,box-shadow .3s;
+}
+.login-logo-title{font-size:20px;font-weight:700;color:var(--tp);text-align:center;}
+.login-logo-sub{font-size:12px;color:var(--ts);font-weight:500;letter-spacing:.5px;text-transform:uppercase;text-align:center;}
+.login-user-select{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;
+}
+.user-btn{
+  border:2px solid var(--border);border-radius:10px;padding:16px 12px;
+  cursor:pointer;background:var(--surface2);transition:all .2s;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.user-btn:hover{border-color:var(--accent);background:rgba(2,132,199,0.05);}
+.user-btn.active-elec{border-color:var(--accent);background:rgba(2,132,199,0.08);}
+.user-btn.active-mech{border-color:var(--orange);background:rgba(234,88,12,0.08);}
+.user-btn-icon{font-size:28px;}
+.user-btn-label{font-size:13px;font-weight:700;color:var(--tp);}
+.user-btn-sub{font-size:11px;color:var(--ts);}
+.login-field{margin-bottom:16px;}
+.login-field label{display:block;font-size:12px;font-weight:700;color:var(--ts);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+.login-field input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:11px 14px;font-size:14px;
+  color:var(--tp);font-family:'DM Sans',sans-serif;
+  transition:border-color .2s,box-shadow .2s;outline:none;
+}
+.login-field input:focus{
+  border-color:var(--accent);background:var(--surface);
+  box-shadow:0 0 0 3px rgba(2,132,199,0.15);
+}
+.btn-login{
+  width:100%;padding:12px;border:none;border-radius:8px;
+  font-size:14px;font-weight:700;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:4px;
+  background:var(--accent);color:#fff;
+}
+.btn-login:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(2,132,199,0.3);}
+.btn-login.mech{background:var(--orange);}
+.btn-login.mech:hover{background:var(--orange2);box-shadow:0 4px 12px rgba(234,88,12,0.3);}
+.login-error{
+  font-size:13px;color:var(--red);text-align:center;
+  margin-top:12px;min-height:20px;font-weight:500;
+}
+
+/* ── HEADER ── */
+header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:64px;flex-shrink:0;position:sticky;top:0;z-index:100;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{
+  width:38px;height:38px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  color:#fff;transition:background .3s,box-shadow .3s;
+}
+.logo-icon.elec{background:var(--accent);box-shadow:0 4px 12px rgba(2,132,199,0.25);}
+.logo-icon.mech{background:var(--orange);box-shadow:0 4px 12px rgba(234,88,12,0.25);}
+.logo-text{font-size:14px;font-weight:700;letter-spacing:.3px;line-height:1.2;color:var(--tp);}
+.logo-sub{font-size:11px;color:var(--ts);font-weight:500;letter-spacing:.5px;text-transform:uppercase;}
+.hdr-right{display:flex;align-items:center;gap:12px;}
+#conn-status{
+  display:flex;align-items:center;gap:6px;
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--ts);
+  padding:5px 12px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;
+}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--yellow);}
+.conn-dot.ok{background:var(--green);box-shadow:0 0 6px rgba(22,163,74,0.4);}
+.conn-dot.err{background:var(--red);}
+.btn-setup{
+  background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.2);
+  color:var(--blue);border-radius:6px;padding:6px 14px;font-size:13px;
+  font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;
+  transition:all .2s;
+}
+.btn-setup:hover{background:rgba(37,99,235,0.15);}
+.btn-logout{
+  background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);
+  color:var(--red);border-radius:6px;padding:6px 14px;font-size:13px;
+  font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.btn-logout:hover{background:rgba(220,38,38,0.15);}
+.user-badge{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1px solid;
+}
+.user-badge.elec{background:rgba(2,132,199,0.08);border-color:rgba(2,132,199,0.3);color:var(--accent);}
+.user-badge.mech{background:rgba(234,88,12,0.08);border-color:rgba(234,88,12,0.3);color:var(--orange);}
+
+/* ── NAV TABS ── */
+nav{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;gap:0;flex-shrink:0;
+}
+.tab{
+  padding:14px 20px;font-size:13px;font-weight:600;color:var(--ts);
+  cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .2s;display:flex;align-items:center;gap:8px;
+  margin-bottom:-1px;
+}
+.tab:hover{color:var(--accent);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab.mech-tab:hover{color:var(--orange);}
+.tab.mech-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.tab svg{width:16px;height:16px;}
+
+/* ── MAIN ── */
+main{flex:1;padding:24px;max-width:1400px;margin:0 auto;width:100%;}
+
+/* ── SECTION PAGES ── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ── CARDS ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:24px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+}
+.card-title{
+  font-size:14px;font-weight:700;color:var(--tp);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:20px;display:flex;align-items:center;gap:10px;
+}
+.card-title::before{content:'';width:4px;height:16px;background:var(--accent);border-radius:2px;}
+.card-title.mech-title::before{background:var(--orange);}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.span2{grid-column:span 2;}
+.form-group.span3{grid-column:span 3;}
+label{font-size:12px;font-weight:700;color:var(--ts);letter-spacing:.5px;text-transform:uppercase;}
+.req{color:var(--red);}
+input,select,textarea{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:10px 14px;font-size:13px;
+  color:var(--tp);font-family:'DM Sans',sans-serif;
+  transition:border-color .2s,box-shadow .2s;outline:none;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);
+  background:var(--surface);
+  box-shadow:0 0 0 3px rgba(2,132,199,0.15);
+}
+body.mech-mode input:focus,body.mech-mode select:focus,body.mech-mode textarea:focus{
+  border-color:var(--orange);
+  box-shadow:0 0 0 3px rgba(234,88,12,0.15);
+}
+input::placeholder,textarea::placeholder{color:var(--tm);}
+select option{background:var(--surface);}
+textarea{resize:vertical;min-height:80px;}
+
+/* Material rows */
+.material-section{margin-top:6px;}
+.material-row{
+  display:grid;grid-template-columns:1fr 100px 100px auto;
+  gap:10px;align-items:end;margin-bottom:10px;
+}
+.btn-icon{
+  width:38px;height:38px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--ts);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.btn-icon:hover{border-color:var(--red);color:var(--red);background:rgba(220,38,38,.08);}
+.btn-icon.add{border-color:var(--green);color:var(--green);background:rgba(22,163,74,.07);}
+.btn-icon.add:hover{background:rgba(22,163,74,.15);}
+
+/* Form actions */
+.form-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
+.btn{
+  padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:all .18s;display:flex;align-items:center;gap:8px;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(2,132,199,0.3);}
+.btn-primary:active{transform:none;}
+.btn-primary.mech{background:var(--orange);}
+.btn-primary.mech:hover{background:var(--orange2);box-shadow:0 4px 12px rgba(234,88,12,0.3);}
+.btn-secondary{background:var(--surface2);color:var(--ts);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--border2);color:var(--tp);background:var(--surface);}
+.btn-danger{background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.25);}
+.btn-danger:hover{background:rgba(220,38,38,.18);}
+.btn-excel{background:rgba(22,163,74,.1);color:var(--green);border:1px solid rgba(22,163,74,.3);}
+.btn-excel:hover{background:rgba(22,163,74,.18);}
+.btn-pdf{background:rgba(37,99,235,.1);color:var(--blue);border:1px solid rgba(37,99,235,.3);}
+.btn-pdf:hover{background:rgba(37,99,235,.18);}
+.btn svg{width:16px;height:16px;flex-shrink:0;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
+
+/* ── STATS BAR ── */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:16px;margin-bottom:24px;
+}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px 20px;
+  display:flex;flex-direction:column;gap:6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.stat-label{font-size:11px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:1px;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--tp);line-height:1;}
+.stat-val.orange{color:var(--accent);}
+.stat-val.mech-orange{color:var(--orange);}
+.stat-val.green{color:var(--green);}
+.stat-val.blue{color:var(--blue);}
+.stat-sub{font-size:11px;color:var(--tm);font-weight:500;}
+
+/* ── DATA TABLE ── */
+.toolbar{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.search-wrap{position:relative;flex:1;min-width:220px;}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ts);}
+#search-input{width:100%;padding-left:36px;}
+.filter-month{display:flex;align-items:center;gap:8px;}
+.filter-month label{font-size:13px;font-weight:600;color:var(--ts);white-space:nowrap;}
+#filter-month{width:170px;padding:9px 12px;font-size:13px;}
+
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead{background:var(--surface2);}
+th{
+  padding:12px 14px;text-align:left;font-size:11px;font-weight:700;
+  color:var(--ts);text-transform:uppercase;letter-spacing:.8px;
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+th.sortable{cursor:pointer;transition: color 0.2s;}
+th.sortable:hover{color:var(--accent);}
+td{
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  vertical-align:middle;color:var(--tp);
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,0,0,0.02);}
+.td-actions{display:flex;gap:8px;}
+.act-btn{
+  padding:6px 12px;border-radius:4px;font-size:12px;font-weight:600;
+  cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif;
+}
+.act-edit{background:rgba(37,99,235,.1);color:var(--blue);border:1px solid rgba(37,99,235,.2);}
+.act-edit:hover{background:rgba(37,99,235,.2);}
+.act-del{background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.2);}
+.act-del:hover{background:rgba(220,38,38,.2);}
+.badge{
+  display:inline-block;padding:4px 10px;border-radius:20px;
+  font-size:11px;font-weight:700;font-family:'DM Mono',monospace;
+}
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--tm);
+}
+.empty-state svg{width:48px;height:48px;margin:0 auto 16px;opacity:.4;display:block;}
+.empty-state p{font-size:14px;font-weight:500;}
+
+/* ── PAGINATION ── */
+.pagination{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:16px;font-size:13px;font-weight:500;color:var(--ts);
+}
+.pg-btns{display:flex;gap:6px;}
+.pg-btn{
+  width:32px;height:32px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--ts);cursor:pointer;font-size:13px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.pg-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--surface);}
+.pg-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.6);
+  z-index:200;display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:28px;width:90%;max-width:700px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 10px 10px -5px rgba(0,0,0,.04);
+  animation:modalIn .25s ease;
+}
+@keyframes modalIn{from{transform:translateY(16px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);
+}
+.modal-title{font-size:16px;font-weight:700;color:var(--tp);}
+.modal-close{
+  width:32px;height:32px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--ts);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  transition:all .15s;
+}
+.modal-close:hover{border-color:var(--red);color:var(--red);background:rgba(220,38,38,0.05);}
+
+/* Setup modal */
+.setup-step{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:16px 20px;margin-bottom:12px;
+}
+.setup-step-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;background:var(--accent);border-radius:50%;
+  font-size:12px;font-weight:700;color:#fff;margin-right:10px;flex-shrink:0;
+}
+.setup-step h4{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;color:var(--tp);}
+.setup-step p{font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:8px;}
+.code-block{
+  background:var(--surface);border:1px solid var(--border);border-radius:6px;
+  padding:12px 14px;font-family:'DM Mono',monospace;font-size:12px;
+  color:#059669;
+  white-space:pre-wrap;word-break:break-all;
+  max-height:200px;overflow-y:auto;position:relative;
+}
+.copy-btn{
+  position:absolute;top:8px;right:8px;padding:4px 10px;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--tp);border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.copy-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.url-input-wrap{display:flex;gap:10px;margin-top:10px;}
+.url-input-wrap input{flex:1;}
+.btn-save-url{
+  padding:10px 20px;background:var(--accent);color:#fff;border:none;
+  border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap;
+}
+.btn-save-url:hover{background:var(--accent2);}
+
+/* Delete confirm */
+.confirm-modal .modal{max-width:400px;text-align:center;}
+.confirm-icon{margin-bottom:16px;}
+.confirm-icon svg{width:48px;height:48px;color:var(--red);margin:0 auto;}
+.confirm-btns{display:flex;gap:10px;justify-content:center;margin-top:24px;}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:32px;right:32px;z-index:999;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px 20px;
+  font-size:14px;font-weight:500;color:var(--tp);min-width:240px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
+  display:none;align-items:center;gap:12px;
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:none;opacity:1;}}
+#toast.show{display:flex;}
+#toast.success{border-left:4px solid var(--green);}
+#toast.error{border-left:4px solid var(--red);}
+#toast.info{border-left:4px solid var(--blue);}
+.toast-icon{width:20px;height:20px;flex-shrink:0;}
+
+/* Spinner */
+.spinner{
+  width:18px;height:18px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;display:none;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Loading overlay */
+#loading{
+  position:fixed;inset:0;background:rgba(255,255,255,.85);
+  z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;
+  backdrop-filter:blur(4px);
+}
+#loading.show{display:flex;}
+.load-ring{
+  width:48px;height:48px;border:4px solid var(--surface3);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+#loading p{font-size:14px;font-weight:600;color:var(--ts);}
+
+@media(max-width:900px){
+  .form-grid{grid-template-columns:repeat(2,1fr);}
+  .form-group.span3{grid-column:span 2;}
+  .stats-bar{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  main{padding:16px;}
+  .form-grid{grid-template-columns:1fr;}
+  .form-group.span2,.form-group.span3{grid-column:span 1;}
+  .stats-bar{grid-template-columns:repeat(2,1fr);}
+  nav{padding:0 16px;}
+  .tab{padding:12px 14px;font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon" id="login-logo-icon">📋</div>
+      <div class="login-logo-title">Laporan Kerja Harian</div>
+      <div class="login-logo-sub">Pilih departemen untuk masuk</div>
+    </div>
+
+    <div class="login-user-select">
+      <div class="user-btn" id="btn-elec" onclick="selectUser('electrical')">
+        <div class="user-btn-icon">⚡</div>
+        <div class="user-btn-label">Electrical</div>
+        <div class="user-btn-sub">Sheet 1</div>
+      </div>
+      <div class="user-btn" id="btn-mech" onclick="selectUser('mechanical')">
+        <div class="user-btn-icon">⚙</div>
+        <div class="user-btn-label">Mechanical</div>
+        <div class="user-btn-sub">Sheet 2</div>
+      </div>
+    </div>
+
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="btn-login" id="btn-login-submit" onclick="doLogin()">Masuk</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP (HEADER + NAV + MAIN)
+══════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon" id="hdr-icon">⚡</div>
+    <div>
+      <div class="logo-text">Laporan Kerja Harian</div>
+      <div class="logo-sub" id="hdr-dept">Electrical Department</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="user-badge elec" id="user-badge">⚡ Electrical</div>
+    <div id="conn-status">
+      <div class="conn-dot" id="cdot"></div>
+      <span id="ctext">Belum terhubung</span>
+    </div>
+    <button class="btn-setup" onclick="openSetup()">⚙ Setup Database</button>
+    <button class="btn-logout" onclick="doLogout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="switchTab('input')" id="tab-input">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Input Laporan
+  </div>
+  <div class="tab" onclick="switchTab('data')" id="tab-data">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    Data & Laporan
+  </div>
+</nav>
+
+<main>
+
+  <div class="page active" id="page-input">
+    <div class="card">
+      <div class="card-title" id="form-card-title">Form Input Laporan Kerja Harian</div>
+      <div class="form-grid" id="main-form">
+
+        <div class="form-group">
+          <label>Tanggal <span class="req">*</span></label>
+          <input type="date" id="f-tanggal">
+        </div>
+        <div class="form-group">
+          <label>Nama Teknisi <span class="req">*</span></label>
+          <input type="text" id="f-nama" placeholder="Masukkan nama lengkap">
+        </div>
+        <div class="form-group">
+          <label>Lokasi / Area</label>
+          <input type="text" id="f-lokasi" placeholder="Cth: Panel Room, Workshop...">
+        </div>
+
+        <div class="form-group span3">
+          <label>Uraian Pekerjaan Harian <span class="req">*</span></label>
+          <textarea id="f-pekerjaan" placeholder="Jelaskan detail pekerjaan yang dilakukan..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Jam Mulai <span class="req">*</span></label>
+          <input type="time" id="f-jam-mulai">
+        </div>
+        <div class="form-group">
+          <label>Jam Selesai <span class="req">*</span></label>
+          <input type="time" id="f-jam-selesai">
+        </div>
+        <div class="form-group">
+          <label>Status Pekerjaan</label>
+          <select id="f-status">
+            <option value="Selesai">✅ Selesai</option>
+            <option value="Dalam Proses">🔄 Dalam Proses</option>
+            <option value="Pending">⏸ Pending</option>
+            <option value="Preventive">🔧 Preventive</option>
+          </select>
+        </div>
+
+        <div class="form-group span3">
+          <label>Material / Sparepart Digunakan</label>
+          <div class="material-section" id="material-rows">
+            <div class="material-row" id="mat-0">
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;color:var(--tm)">Nama Material</label>
+                <input type="text" class="mat-name" placeholder="Nama material / sparepart">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;color:var(--tm)">QTY</label>
+                <input type="number" class="mat-qty" placeholder="0" min="0" step="any">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;color:var(--tm)">UOM</label>
+                <select class="mat-uom">
+                  <option value="">— Pilih —</option>
+                  <option>PCS</option><option>MTR</option><option>SET</option>
+                  <option>ROLL</option><option>KG</option><option>LITER</option>
+                  <option>BOX</option><option>UNIT</option><option>LOT</option>
+                </select>
+              </div>
+              <div style="padding-top:20px">
+                <button class="btn-icon add" onclick="addMaterialRow()" title="Tambah baris">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group span3">
+          <label>Remarks / Catatan</label>
+          <textarea id="f-remarks" placeholder="Catatan tambahan, temuan, rekomendasi tindak lanjut..."></textarea>
+        </div>
+
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="resetForm()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset
+        </button>
+        <button class="btn btn-primary" onclick="submitForm()" id="btn-submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="submit-txt">Simpan Laporan</span>
+          <div class="spinner" id="submit-spinner"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-data">
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-label">Total Laporan</div>
+        <div class="stat-val orange" id="stat-total">0</div>
+        <div class="stat-sub">Semua periode</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bulan Ini</div>
+        <div class="stat-val green" id="stat-month">0</div>
+        <div class="stat-sub" id="stat-month-label">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Teknisi Aktif</div>
+        <div class="stat-val blue" id="stat-tech">0</div>
+        <div class="stat-sub">Bulan ini</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pekerjaan Selesai</div>
+        <div class="stat-val" id="stat-done">0</div>
+        <div class="stat-sub">Bulan ini</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" placeholder="Cari nama, pekerjaan, material..." oninput="filterData()">
+        </div>
+        <div class="filter-month">
+          <label>Bulan:</label>
+          <input type="month" id="filter-month" onchange="filterData()">
+        </div>
+        <button class="btn btn-secondary" onclick="loadData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+        <button class="btn btn-excel" onclick="exportExcel()" id="btn-excel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Export Excel
+        </button>
+        <button class="btn btn-pdf" onclick="exportPDF()" id="btn-pdf">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+          Export PDF
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th class="sortable" onclick="sortTable('tanggal')">Tanggal ↕</th>
+              <th class="sortable" onclick="sortTable('nama')">Nama ↕</th>
+              <th>Lokasi</th>
+              <th>Pekerjaan</th>
+              <th>Jam</th>
+              <th>Material</th>
+              <th>Status</th>
+              <th>Remarks</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr><td colspan="10"><div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <p>Belum ada data. Sambungkan database terlebih dahulu.</p>
+            </div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="pg-info">Menampilkan 0 data</span>
+        <div class="pg-btns" id="pg-btns"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════
+     SETUP MODAL
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="setup-modal">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-header">
+      <div class="modal-title">⚙ Setup Koneksi Database</div>
+      <button class="modal-close" onclick="closeSetup()">✕</button>
+    </div>
+
+    <div class="setup-step">
+      <h4><span class="setup-step-num">1</span>Buat Google Sheet Baru</h4>
+      <p>Buka <strong>sheets.google.com</strong> → buat spreadsheet baru → beri nama <strong>"Laporan Kerja Harian"</strong>.<br>
+      Rename <strong>Sheet1</strong> (untuk Electrical) dan tambahkan <strong>Sheet2</strong> (untuk Mechanical). Header akan dibuat otomatis.</p>
+    </div>
+
+    <div class="setup-step">
+      <h4><span class="setup-step-num">2</span>Buka Apps Script & Paste Kode</h4>
+      <p>Di Google Sheet → klik menu <strong>Extensions</strong> → <strong>Apps Script</strong> → hapus semua kode → paste kode berikut:</p>
+      <div style="position:relative">
+        <div class="code-block" id="gs-code">// ================================================
+// LAPORAN KERJA HARIAN - Apps Script v5 (Electrical + Mechanical)
+// PASTE SELURUH KODE INI, LALU DEPLOY NEW VERSION
+// ================================================
+
+var COLS = [
+  'ID','Tanggal','Nama','Lokasi','Pekerjaan',
+  'Jam Mulai','Jam Selesai','Durasi',
+  'Material','QTY','UOM','Status','Remarks','Timestamp'
+];
+
+// Sheet 1 = Electrical, Sheet 2 = Mechanical
+function getSheet(dept) {
+  var ss = SpreadsheetApp.getActive();
+  if (dept === 'mechanical') {
+    // Pastikan Sheet2 ada, buat jika belum ada
+    var sh = ss.getSheets()[1];
+    if (!sh) {
+      sh = ss.insertSheet('Mechanical', 1);
+    }
+    return sh;
+  }
+  return ss.getSheets()[0]; // default: Sheet1 = Electrical
+}
+
+function ensureHeader(sheet) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(COLS);
+    sheet.getRange(1,1,1,COLS.length).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  }
+}
+
+// ── doGet: getAll, edit, delete, test ──────────────
+function doGet(e) {
+  try {
+    var p      = e.parameter;
+    var action = p.action || 'getAll';
+    var dept   = p.dept || 'electrical';
+    var sheet  = getSheet(dept);
+
+    if (action === 'test') {
+      return json({status:'ok', msg:'Koneksi berhasil! Apps Script v5 aktif. Dept: ' + dept});
+    }
+
+    if (action === 'getAll') {
+      ensureHeader(sheet);
+      var raw = sheet.getDataRange().getValues();
+      if (raw.length <= 1) return json({status:'ok', data:[]});
+      var headers = raw[0];
+      var rows = raw.slice(1).map(function(row, i) {
+        var obj = {_row: i + 2};
+        headers.forEach(function(h, j) { obj[h] = row[j]; });
+        return obj;
+      });
+      return json({status:'ok', data: rows});
+    }
+
+    if (action === 'edit') {
+      var rNum = parseInt(p._row);
+      if (isNaN(rNum) || rNum < 2) {
+        return json({status:'error', msg:'_row tidak valid: ' + p._row});
+      }
+      ensureHeader(sheet);
+      var lastTs = '';
+      try { lastTs = sheet.getRange(rNum, COLS.length).getValue(); } catch(x){}
+      var vals = [[
+        p.fID || '', p.fTgl || '', p.fNama || '', p.fLok || '', p.fPek || '',
+        p.fJm || '', p.fJs || '', p.fDur || '',
+        p.fMat || '', p.fQty || '', p.fUom || '', p.fSts || '', p.fRem || '',
+        lastTs || Utilities.formatDate(new Date(),'Asia/Jakarta','dd/MM/yyyy HH:mm:ss')
+      ]];
+      sheet.getRange(rNum, 1, 1, COLS.length).setValues(vals);
+      return json({status:'ok', updated: rNum});
+    }
+
+    if (action === 'delete') {
+      var rNum = parseInt(p._row);
+      if (isNaN(rNum) || rNum < 2) {
+        return json({status:'error', msg:'_row tidak valid: ' + p._row});
+      }
+      sheet.deleteRow(rNum);
+      return json({status:'ok', deleted: rNum});
+    }
+
+    return json({status:'error', msg:'Action tidak dikenal: ' + action});
+
+  } catch(err) {
+    return json({status:'error', msg: 'doGet error: ' + err.toString()});
+  }
+}
+
+// ── doPost: add ────────────────────────────────────
+function doPost(e) {
+  try {
+    var body  = JSON.parse(e.postData.contents);
+    var dept  = body.dept || 'electrical';
+    var sheet = getSheet(dept);
+    ensureHeader(sheet);
+
+    if (body.action === 'add') {
+      var prefix = dept === 'mechanical' ? 'MC-' : 'EL-';
+      var id = prefix + Date.now();
+      body.rows.forEach(function(r) {
+        sheet.appendRow([
+          id, r.tanggal, r.nama, r.lokasi, r.pekerjaan,
+          r.jamMulai, r.jamSelesai, r.durasi,
+          r.material, r.qty, r.uom, r.status, r.remarks,
+          Utilities.formatDate(new Date(),'Asia/Jakarta','dd/MM/yyyy HH:mm:ss')
+        ]);
+      });
+      return json({status:'ok', id: id});
+    }
+
+    return json({status:'error', msg:'Action POST tidak dikenal: ' + body.action});
+
+  } catch(err) {
+    return json({status:'error', msg: 'doPost error: ' + err.toString()});
+  }
+}
+
+function json(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+        <button class="copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <h4><span class="setup-step-num">3</span>Deploy Sebagai Web App</h4>
+      <p>Klik <strong>Deploy</strong> → <strong>New deployment</strong> → Type: <strong>Web app</strong><br>
+      Execute as: <strong>Me</strong> | Who has access: <strong>Anyone</strong> → Klik <strong>Deploy</strong> → Izinkan akses → Copy URL yang muncul.</p>
+    </div>
+
+    <div class="setup-step" style="border-left:4px solid #ef4444;background:rgba(239,68,68,0.08)">
+      <h4 style="color:#dc2626"><span class="setup-step-num" style="background:#dc2626">!</span>Sudah pernah deploy? WAJIB perbarui kode!</h4>
+      <p style="color:#7f1d1d">Kode Apps Script sudah diupdate ke v5 (support Electrical + Mechanical). Kamu HARUS copy ulang kode di atas, paste ke Apps Script, lalu <strong>Deploy → New deployment → Web app → Anyone → Deploy</strong>. Pakai URL baru yang muncul.</p>
+    </div>
+
+    <div class="setup-step">
+      <h4><span class="setup-step-num">4</span>Masukkan URL Apps Script</h4>
+      <p>Satu URL digunakan bersama oleh Electrical dan Mechanical. Paste URL deployment kamu di bawah ini:</p>
+      <div class="url-input-wrap">
+        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/AKfy.../exec" value="">
+        <button class="btn-save-url" onclick="saveApiUrl()">Simpan & Test</button>
+        <button class="btn-save-url" style="background:var(--blue)" onclick="runDiagnostic()">🔍 Diagnostik</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏ Edit Laporan</div>
+      <button class="modal-close" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="form-grid">
+      <input type="hidden" id="e-row">
+      <input type="hidden" id="e-id">
+      <div class="form-group">
+        <label>Tanggal</label>
+        <input type="date" id="e-tanggal">
+      </div>
+      <div class="form-group">
+        <label>Nama Teknisi</label>
+        <input type="text" id="e-nama">
+      </div>
+      <div class="form-group">
+        <label>Lokasi</label>
+        <input type="text" id="e-lokasi">
+      </div>
+      <div class="form-group span3">
+        <label>Uraian Pekerjaan</label>
+        <textarea id="e-pekerjaan"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Jam Mulai</label>
+        <input type="time" id="e-jam-mulai">
+      </div>
+      <div class="form-group">
+        <label>Jam Selesai</label>
+        <input type="time" id="e-jam-selesai">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="e-status">
+          <option>Selesai</option>
+          <option>Dalam Proses</option>
+          <option>Pending</option>
+          <option>Preventive</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Material</label>
+        <input type="text" id="e-material">
+      </div>
+      <div class="form-group">
+        <label>QTY</label>
+        <input type="number" id="e-qty" min="0" step="any">
+      </div>
+      <div class="form-group">
+        <label>UOM</label>
+        <select id="e-uom">
+          <option value="">— Pilih —</option>
+          <option>PCS</option><option>MTR</option><option>SET</option>
+          <option>ROLL</option><option>KG</option><option>LITER</option>
+          <option>BOX</option><option>UNIT</option><option>LOT</option>
+        </select>
+      </div>
+      <div class="form-group span3">
+        <label>Remarks</label>
+        <textarea id="e-remarks"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeEdit()">Batal</button>
+      <button class="btn btn-primary" id="btn-save-edit" onclick="saveEdit()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+        Simpan Perubahan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay confirm-modal" id="del-modal">
+  <div class="modal">
+    <div class="confirm-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div style="font-size:18px;font-weight:700;color:var(--tp);margin-bottom:8px;">Hapus Data?</div>
+    <div style="font-size:14px;color:var(--ts);line-height:1.5" id="del-info">Data ini akan dihapus permanen dari database.</div>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeDelete()">Batal</button>
+      <button class="btn btn-danger" onclick="confirmDelete()" id="btn-confirm-del">Ya, Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading"><div class="load-ring"></div><p id="loading-msg">Memproses...</p></div>
+
+<div id="toast">
+  <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="toast-icon"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  USERS CONFIG — ubah password di sini
+// ══════════════════════════════════════════
+const USERS = {
+  electrical: { password: '123456789', label: 'Electrical', icon: '⚡', sheet: 'electrical', dept: 'electrical' },
+  mechanical:  { password: '123456789', label: 'Mechanical', icon: '⚙',  sheet: 'mechanical', dept: 'mechanical' },
+};
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let API_URL     = localStorage.getItem('app_api_url') || '';
+let currentUser = null;   // 'electrical' | 'mechanical'
+let allData     = [];
+let filteredData= [];
+let currentPage = 1;
+const PAGE_SIZE = 15;
+let sortKey     = 'tanggal';
+let sortAsc     = false;
+let deleteRow   = null;
+let matRowCount = 1;
+
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+let selectedUserKey = null;
+
+function selectUser(key) {
+  selectedUserKey = key;
+  const elecBtn = document.getElementById('btn-elec');
+  const mechBtn = document.getElementById('btn-mech');
+  elecBtn.className = 'user-btn' + (key === 'electrical' ? ' active-elec' : '');
+  mechBtn.className = 'user-btn' + (key === 'mechanical' ? ' active-mech' : '');
+
+  const loginBtn = document.getElementById('btn-login-submit');
+  const loginIcon = document.getElementById('login-logo-icon');
+  if (key === 'electrical') {
+    loginBtn.className = 'btn-login';
+    loginIcon.style.background = 'var(--accent)';
+    loginIcon.style.boxShadow  = '0 8px 20px rgba(2,132,199,0.25)';
+    loginIcon.textContent = '⚡';
+  } else {
+    loginBtn.className = 'btn-login mech';
+    loginIcon.style.background = 'var(--orange)';
+    loginIcon.style.boxShadow  = '0 8px 20px rgba(234,88,12,0.25)';
+    loginIcon.textContent = '⚙';
+  }
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-password').focus();
+}
+
+function doLogin() {
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+
+  if (!selectedUserKey) {
+    errEl.textContent = 'Pilih departemen terlebih dahulu!';
+    return;
+  }
+
+  const pw    = document.getElementById('login-password').value;
+  const user  = USERS[selectedUserKey];
+
+  if (pw !== user.password) {
+    errEl.textContent = 'Password salah. Coba lagi.';
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-password').focus();
+    return;
+  }
+
+  // Login berhasil
+  currentUser = selectedUserKey;
+  applyTheme(currentUser);
+
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('login-password').value = '';
+
+  setTodayDate();
+  updateConnStatus();
+  const now = new Date();
+  document.getElementById('filter-month').value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  updateStats();
+  if (API_URL) loadData();
+}
+
+function doLogout() {
+  currentUser = null;
+  selectedUserKey = null;
+  allData = []; filteredData = [];
+  updateStats();
+
+  // Reset login UI
+  document.getElementById('btn-elec').className = 'user-btn';
+  document.getElementById('btn-mech').className = 'user-btn';
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-logo-icon').textContent = '📋';
+  document.getElementById('login-logo-icon').style.background = 'var(--accent)';
+  document.getElementById('btn-login-submit').className = 'btn-login';
+
+  switchTab('input');
+  document.getElementById('login-screen').classList.remove('hidden');
+}
+
+function applyTheme(userKey) {
+  const user = USERS[userKey];
+  const isMech = userKey === 'mechanical';
+
+  // Header
+  const icon = document.getElementById('hdr-icon');
+  icon.textContent = user.icon;
+  icon.className   = 'logo-icon ' + (isMech ? 'mech' : 'elec');
+  document.getElementById('hdr-dept').textContent = user.label + ' Department';
+
+  // Badge
+  const badge = document.getElementById('user-badge');
+  badge.textContent  = user.icon + ' ' + user.label;
+  badge.className    = 'user-badge ' + (isMech ? 'mech' : 'elec');
+
+  // Form title
+  document.getElementById('form-card-title').className = 'card-title' + (isMech ? ' mech-title' : '');
+
+  // Submit button
+  const btnSubmit = document.getElementById('btn-submit');
+  btnSubmit.className = 'btn btn-primary' + (isMech ? ' mech' : '');
+
+  // Save edit button
+  document.getElementById('btn-save-edit').className = 'btn btn-primary' + (isMech ? ' mech' : '');
+
+  // Tabs color
+  document.querySelectorAll('.tab').forEach(t => {
+    if (isMech) t.classList.add('mech-tab');
+    else t.classList.remove('mech-tab');
+  });
+
+  // Stats color for total
+  document.getElementById('stat-total').className = 'stat-val ' + (isMech ? 'mech-orange' : 'orange');
+
+  // Body class for input focus color
+  if (isMech) document.body.classList.add('mech-mode');
+  else document.body.classList.remove('mech-mode');
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Tampilkan login screen; app dimulai setelah login
+});
+
+function setTodayDate() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-tanggal').value = today;
+}
+
+function updateConnStatus() {
+  const dot = document.getElementById('cdot');
+  const txt = document.getElementById('ctext');
+  if (API_URL) {
+    dot.className = 'conn-dot ok';
+    txt.textContent = 'Database terhubung';
+  } else {
+    dot.className = 'conn-dot';
+    txt.textContent = 'Belum terhubung';
+  }
+}
+
+// ══════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('page-' + tab).classList.add('active');
+  if (tab === 'data') loadData();
+}
+
+// ══════════════════════════════════════════
+//  MATERIAL ROWS
+// ══════════════════════════════════════════
+function addMaterialRow() {
+  matRowCount++;
+  const container = document.getElementById('material-rows');
+  const div = document.createElement('div');
+  div.className = 'material-row';
+  div.id = `mat-${matRowCount}`;
+  div.innerHTML = `
+    <div class="form-group" style="margin:0">
+      <input type="text" class="mat-name" placeholder="Nama material / sparepart">
+    </div>
+    <div class="form-group" style="margin:0">
+      <input type="number" class="mat-qty" placeholder="0" min="0" step="any">
+    </div>
+    <div class="form-group" style="margin:0">
+      <select class="mat-uom">
+        <option value="">— Pilih —</option>
+        <option>PCS</option><option>MTR</option><option>SET</option>
+        <option>ROLL</option><option>KG</option><option>LITER</option>
+        <option>BOX</option><option>UNIT</option><option>LOT</option>
+      </select>
+    </div>
+    <div>
+      <button class="btn-icon" onclick="removeMaterialRow('mat-${matRowCount}')" title="Hapus baris">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>`;
+  container.appendChild(div);
+}
+
+function removeMaterialRow(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function getMaterialData() {
+  const rows = document.querySelectorAll('#material-rows .material-row');
+  const result = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.mat-name')?.value?.trim();
+    const qty  = row.querySelector('.mat-qty')?.value?.trim();
+    const uom  = row.querySelector('.mat-uom')?.value?.trim();
+    if (name) result.push({name, qty: qty||'', uom: uom||''});
+  });
+  return result;
+}
+
+// ══════════════════════════════════════════
+//  FORM SUBMIT
+// ══════════════════════════════════════════
+async function submitForm() {
+  if (!API_URL) { showToast('Sambungkan database dulu! Klik "Setup Database"', 'error'); openSetup(); return; }
+
+  const tanggal   = document.getElementById('f-tanggal').value;
+  const nama      = document.getElementById('f-nama').value.trim();
+  const pekerjaan = document.getElementById('f-pekerjaan').value.trim();
+  const jamMulai  = document.getElementById('f-jam-mulai').value;
+  const jamSelesai= document.getElementById('f-jam-selesai').value;
+
+  if (!tanggal||!nama||!pekerjaan||!jamMulai||!jamSelesai) {
+    showToast('Lengkapi kolom wajib (bertanda ✱)', 'error'); return;
+  }
+
+  const lokasi  = document.getElementById('f-lokasi').value.trim();
+  const status  = document.getElementById('f-status').value;
+  const remarks = document.getElementById('f-remarks').value.trim();
+  const mats    = getMaterialData();
+  const durasi  = calcDurasi(jamMulai, jamSelesai);
+
+  const baseRow = {tanggal, nama, lokasi, pekerjaan, jamMulai, jamSelesai, durasi, status, remarks};
+  const rows = mats.length > 0
+    ? mats.map(m => ({...baseRow, material: m.name, qty: m.qty, uom: m.uom}))
+    : [{...baseRow, material:'', qty:'', uom:''}];
+
+  setBtnLoading(true);
+  try {
+    const res = await apiPost({action:'add', dept: USERS[currentUser].dept, rows});
+    if (res.status === 'ok') {
+      showToast('Laporan berhasil disimpan!', 'success');
+      resetForm();
+    } else throw new Error(res.msg || 'Gagal');
+  } catch(e) {
+    showToast('Gagal menyimpan: ' + e.message, 'error');
+  }
+  setBtnLoading(false);
+}
+
+function calcDurasi(start, end) {
+  if (!start || !end) return '';
+  const [sh,sm] = start.split(':').map(Number);
+  const [eh,em] = end.split(':').map(Number);
+  const diff = (eh*60+em) - (sh*60+sm);
+  if (diff <= 0) return '';
+  const h = Math.floor(diff/60), m = diff%60;
+  return `${h > 0 ? h+'j ' : ''}${m > 0 ? m+'m' : ''}`.trim();
+}
+
+function setBtnLoading(loading) {
+  const btn = document.getElementById('btn-submit');
+  const txt = document.getElementById('submit-txt');
+  const sp  = document.getElementById('submit-spinner');
+  btn.disabled = loading;
+  txt.textContent = loading ? 'Menyimpan...' : 'Simpan Laporan';
+  sp.style.display = loading ? 'block' : 'none';
+}
+
+function resetForm() {
+  document.getElementById('f-nama').value = '';
+  document.getElementById('f-lokasi').value = '';
+  document.getElementById('f-pekerjaan').value = '';
+  document.getElementById('f-jam-mulai').value = '';
+  document.getElementById('f-jam-selesai').value = '';
+  document.getElementById('f-status').value = 'Selesai';
+  document.getElementById('f-remarks').value = '';
+  document.getElementById('material-rows').innerHTML = `
+    <div class="material-row" id="mat-0">
+      <div class="form-group" style="margin:0"><input type="text" class="mat-name" placeholder="Nama material / sparepart"></div>
+      <div class="form-group" style="margin:0"><input type="number" class="mat-qty" placeholder="0" min="0" step="any"></div>
+      <div class="form-group" style="margin:0">
+        <select class="mat-uom"><option value="">— Pilih —</option>
+          <option>PCS</option><option>MTR</option><option>SET</option>
+          <option>ROLL</option><option>KG</option><option>LITER</option>
+          <option>BOX</option><option>UNIT</option><option>LOT</option>
+        </select>
+      </div>
+      <div style="padding-top:20px">
+        <button class="btn-icon add" onclick="addMaterialRow()" title="Tambah baris">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div>`;
+  matRowCount = 1;
+  setTodayDate();
+}
+
+// ══════════════════════════════════════════
+//  LOAD DATA
+// ══════════════════════════════════════════
+async function loadData() {
+  if (!API_URL || !currentUser) return;
+  showLoading('Mengambil data...');
+  try {
+    const res = await apiGet({action:'getAll', dept: USERS[currentUser].dept});
+    if (res.status === 'ok') {
+      allData = res.data || [];
+      filterData();
+      updateStats();
+    } else throw new Error(res.msg);
+  } catch(e) {
+    showToast('Gagal ambil data: ' + e.message, 'error');
+  }
+  hideLoading();
+}
+
+function updateStats() {
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const monthData = allData.filter(d => getLocalYearMonth(d['Tanggal']) === thisMonth);
+  const techSet   = new Set(monthData.map(d => d['Nama']));
+  const doneCount = monthData.filter(d => d['Status'] === 'Selesai').length;
+  const months    = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+  document.getElementById('stat-total').textContent  = allData.length;
+  document.getElementById('stat-month').textContent  = monthData.length;
+  document.getElementById('stat-month-label').textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('stat-tech').textContent   = techSet.size;
+  document.getElementById('stat-done').textContent   = doneCount;
+}
+
+// ══════════════════════════════════════════
+//  FILTER & SORT
+// ══════════════════════════════════════════
+function filterData() {
+  const q     = document.getElementById('search-input').value.toLowerCase();
+  const month = document.getElementById('filter-month').value;
+
+  filteredData = allData.filter(row => {
+    const tgl = getLocalYearMonth(row['Tanggal']);
+    const matchMonth = !month || tgl === month;
+    const matchQ = !q || ['Nama','Pekerjaan','Material','Lokasi','Remarks']
+      .some(k => String(row[k]||'').toLowerCase().includes(q));
+    return matchMonth && matchQ;
+  });
+
+  filteredData.sort((a,b) => {
+    const va = String(a[colName(sortKey)]||'');
+    const vb = String(b[colName(sortKey)]||'');
+    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+
+  currentPage = 1;
+  renderTable();
+}
+
+function colName(k){ return {'tanggal':'Tanggal','nama':'Nama'}[k] || k; }
+
+function sortTable(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = true; }
+  filterData();
+}
+
+// ══════════════════════════════════════════
+//  RENDER TABLE
+// ══════════════════════════════════════════
+const STATUS_COLOR = {
+  'Selesai':      'background:rgba(22,163,74,.12);color:#16a34a',
+  'Dalam Proses': 'background:rgba(37,99,235,.12);color:#2563eb',
+  'Pending':      'background:rgba(202,138,4,.12);color:#ca8a04',
+  'Preventive':   'background:rgba(147,51,234,.12);color:#9333ea',
+};
+
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  const total = filteredData.length;
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page  = filteredData.slice(start, start+PAGE_SIZE);
+
+  if (!total) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <p>Tidak ada data ditemukan</p></div></td></tr>`;
+    document.getElementById('pg-info').textContent = 'Menampilkan 0 data';
+    document.getElementById('pg-btns').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = page.map((row, i) => {
+    const st = row['Status'] || '';
+    const stStyle = STATUS_COLOR[st] || 'background:rgba(0,0,0,.06);color:#475569';
+    const jamMulaiF  = formatJam(row['Jam Mulai']);
+    const jamSelesaiF= formatJam(row['Jam Selesai']);
+    const jam = `${jamMulaiF} - ${jamSelesaiF}${row['Durasi']?' ('+row['Durasi']+')':''}`;
+    const mat = row['Material'] ? `${row['Material']} ${row['QTY']?row['QTY']:''} ${row['UOM']||''}`.trim() : '—';
+    const pek = (row['Pekerjaan']||'').length > 50
+      ? row['Pekerjaan'].slice(0,50)+'...' : (row['Pekerjaan']||'—');
+    return `<tr>
+      <td style="color:var(--tm);font-size:12px;font-weight:500;">${start+i+1}</td>
+      <td style="white-space:nowrap;font-family:'DM Mono',monospace;font-size:12px">${formatTanggal(row['Tanggal'])}</td>
+      <td style="font-weight:700">${row['Nama']||'—'}</td>
+      <td style="color:var(--ts);font-size:12.5px">${row['Lokasi']||'—'}</td>
+      <td style="max-width:200px" title="${row['Pekerjaan']||''}">${pek}</td>
+      <td style="white-space:nowrap;font-size:12px;font-family:'DM Mono',monospace;color:var(--ts)">${jam}</td>
+      <td style="max-width:150px;font-size:12px">${mat}</td>
+      <td><span class="badge" style="${stStyle}">${st||'—'}</span></td>
+      <td style="max-width:120px;font-size:12px;color:var(--ts)">${(row['Remarks']||'').slice(0,40)||'—'}</td>
+      <td>
+        <div class="td-actions">
+          <button class="act-btn act-edit" onclick="openEdit(${row._row})">Edit</button>
+          <button class="act-btn act-del"  onclick="openDelete(${row._row})">Hapus</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  document.getElementById('pg-info').textContent =
+    `Menampilkan ${start+1}–${Math.min(start+PAGE_SIZE,total)} dari ${total} data`;
+
+  let pgHTML = '';
+  pgHTML += `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let p=1; p<=totalPages; p++) {
+    if (p===1||p===totalPages||Math.abs(p-currentPage)<=1)
+      pgHTML += `<button class="pg-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    else if (Math.abs(p-currentPage)===2)
+      pgHTML += `<span style="color:var(--tm);padding:0 2px">…</span>`;
+  }
+  pgHTML += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  document.getElementById('pg-btns').innerHTML = pgHTML;
+}
+
+function goPage(p){
+  const max = Math.ceil(filteredData.length/PAGE_SIZE);
+  if(p<1||p>max) return;
+  currentPage=p; renderTable();
+}
+
+// ── Date/Time Helpers ──
+function sheetToDate(d){
+  if(!d) return null;
+  if(typeof d==='string'&&d.includes('T')) return new Date(d);
+  if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)) return new Date(d+'T00:00:00');
+  return new Date(d);
+}
+function formatTanggal(d){
+  if(!d) return '—';
+  const dt = sheetToDate(d);
+  if(!dt||isNaN(dt)) return String(d);
+  const days=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${days[dt.getDay()]}, ${String(dt.getDate()).padStart(2,'0')} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+function formatTanggalShort(d){
+  if(!d) return '—';
+  const dt = sheetToDate(d);
+  if(!dt||isNaN(dt)) return String(d);
+  const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${String(dt.getDate()).padStart(2,'0')} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+function getLocalYearMonth(d){
+  if(!d) return '';
+  const dt = sheetToDate(d);
+  if(!dt||isNaN(dt)) return '';
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+}
+function formatJam(t){
+  if(!t) return '—';
+  if(typeof t==='string'&&t.includes('T')){
+    const dt = new Date(t);
+    if(!isNaN(dt)) return `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+  }
+  return String(t).slice(0,5);
+}
+function toDateInput(d){
+  if(!d) return '';
+  const dt = sheetToDate(d);
+  if(!dt||isNaN(dt)) return '';
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+function toTimeInput(t){
+  if(!t) return '';
+  const s = formatJam(t);
+  return s==='—' ? '' : s;
+}
+
+// ══════════════════════════════════════════
+//  EDIT
+// ══════════════════════════════════════════
+function openEdit(rowNum) {
+  const row = allData.find(r => r._row == rowNum);
+  if (!row) { showToast('Data tidak ditemukan (row ' + rowNum + ')', 'error'); return; }
+  document.getElementById('e-row').value        = rowNum;
+  document.getElementById('e-id').value         = row['ID']||'';
+  document.getElementById('e-tanggal').value    = toDateInput(row['Tanggal']);
+  document.getElementById('e-nama').value       = row['Nama']||'';
+  document.getElementById('e-lokasi').value     = row['Lokasi']||'';
+  document.getElementById('e-pekerjaan').value  = row['Pekerjaan']||'';
+  document.getElementById('e-jam-mulai').value  = toTimeInput(row['Jam Mulai']);
+  document.getElementById('e-jam-selesai').value= toTimeInput(row['Jam Selesai']);
+  document.getElementById('e-status').value     = row['Status']||'Selesai';
+  document.getElementById('e-material').value   = row['Material']||'';
+  document.getElementById('e-qty').value        = row['QTY']||'';
+  document.getElementById('e-uom').value        = row['UOM']||'';
+  document.getElementById('e-remarks').value    = row['Remarks']||'';
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEdit(){ document.getElementById('edit-modal').classList.remove('open'); }
+
+async function saveEdit() {
+  const rowNum     = parseInt(document.getElementById('e-row').value);
+  const jamMulai   = document.getElementById('e-jam-mulai').value;
+  const jamSelesai = document.getElementById('e-jam-selesai').value;
+  showLoading('Menyimpan perubahan...');
+  try {
+    const res = await apiGet({
+      action:'edit', dept: USERS[currentUser].dept,
+      _row   : rowNum,
+      fID    : document.getElementById('e-id').value,
+      fTgl   : document.getElementById('e-tanggal').value,
+      fNama  : document.getElementById('e-nama').value,
+      fLok   : document.getElementById('e-lokasi').value,
+      fPek   : document.getElementById('e-pekerjaan').value,
+      fJm    : jamMulai,
+      fJs    : jamSelesai,
+      fDur   : calcDurasi(jamMulai, jamSelesai),
+      fSts   : document.getElementById('e-status').value,
+      fMat   : document.getElementById('e-material').value,
+      fQty   : document.getElementById('e-qty').value,
+      fUom   : document.getElementById('e-uom').value,
+      fRem   : document.getElementById('e-remarks').value,
+    });
+    showToast('Data berhasil diupdate! ✓', 'success');
+    closeEdit();
+    loadData();
+  } catch(err) {
+    showToast('Gagal edit: ' + err.message, 'error');
+  }
+  hideLoading();
+}
+
+// ══════════════════════════════════════════
+//  DELETE
+// ══════════════════════════════════════════
+function openDelete(rowNum) {
+  const row = allData.find(r => r._row == rowNum);
+  if (!row) { showToast('Data tidak ditemukan (row ' + rowNum + ')', 'error'); return; }
+  deleteRow = rowNum;
+  document.getElementById('del-info').textContent =
+    `Hapus laporan "${row['Nama']||''}" tanggal ${formatTanggal(row['Tanggal'])}?`;
+  document.getElementById('del-modal').classList.add('open');
+}
+function closeDelete(){ document.getElementById('del-modal').classList.remove('open'); deleteRow=null; }
+
+async function confirmDelete() {
+  if (!deleteRow) return;
+  showLoading('Menghapus data...');
+  try {
+    await apiGet({ action:'delete', dept: USERS[currentUser].dept, _row: deleteRow });
+    showToast('Data berhasil dihapus','success');
+    closeDelete(); loadData();
+  } catch(e){ showToast('Gagal hapus: '+e.message,'error'); }
+  hideLoading();
+}
+
+// ══════════════════════════════════════════
+//  EXPORT EXCEL
+// ══════════════════════════════════════════
+function exportExcel() {
+  const month = document.getElementById('filter-month').value;
+  const data  = filteredData;
+  if (!data.length){ showToast('Tidak ada data untuk diekspor','error'); return; }
+
+  const deptLabel = USERS[currentUser].label;
+  const rows = data.map((r,i) => ({
+    'No': i+1,
+    'Tanggal': formatTanggalShort(r['Tanggal']),
+    'Nama Teknisi': r['Nama']||'',
+    'Lokasi': r['Lokasi']||'',
+    'Uraian Pekerjaan': r['Pekerjaan']||'',
+    'Jam Mulai': formatJam(r['Jam Mulai']),
+    'Jam Selesai': formatJam(r['Jam Selesai']),
+    'Durasi': r['Durasi']||'',
+    'Material': r['Material']||'',
+    'QTY': r['QTY']||'',
+    'UOM': r['UOM']||'',
+    'Status': r['Status']||'',
+    'Remarks': r['Remarks']||'',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [5,14,20,14,40,10,10,8,25,6,6,14,30].map(w=>({wch:w}));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, `Laporan ${deptLabel}`);
+  const fname = `Laporan_${deptLabel}${month?'_'+month:''}.xlsx`;
+  XLSX.writeFile(wb, fname);
+  showToast(`File ${fname} berhasil diunduh!`, 'success');
+}
+
+// ══════════════════════════════════════════
+//  EXPORT PDF
+// ══════════════════════════════════════════
+function exportPDF() {
+  const data = [...filteredData].sort((a,b) => new Date(a['Tanggal']) - new Date(b['Tanggal']));
+  if (!data.length){ showToast('Tidak ada data untuk diekspor','error'); return; }
+
+  const deptLabel = USERS[currentUser].label;
+  const isMech    = currentUser === 'mechanical';
+  const accentRGB = isMech ? [234,88,12] : [2,132,199];
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+
+  const month = document.getElementById('filter-month').value;
+  const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  let monthLabel = '';
+  if (month) {
+    const [y,m] = month.split('-');
+    monthLabel = months[parseInt(m)-1] + ' ' + y;
+  }
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const coverCenterX = pageW / 2;
+  const coverCenterY = pageH / 2;
+
+  doc.setTextColor(0,0,0);
+  doc.setFont(undefined,'bold');
+
+  const coverTitle    = `LAPORAN KEGIATAN ${deptLabel.toUpperCase()}`;
+  const coverSubtitle = (monthLabel || 'SEMUA PERIODE').toUpperCase();
+  const coverMaxWidth = pageW - 20;
+
+  let titleSize = 44;
+  doc.setFontSize(titleSize);
+  while (doc.getTextWidth(coverTitle) > coverMaxWidth && titleSize > 10) { titleSize--; doc.setFontSize(titleSize); }
+
+  let subSize = 44;
+  doc.setFontSize(subSize);
+  while (doc.getTextWidth(coverSubtitle) > coverMaxWidth && subSize > 10) { subSize--; doc.setFontSize(subSize); }
+
+  doc.setFontSize(titleSize);
+  doc.text(coverTitle, coverCenterX, coverCenterY - 8, { align:'center' });
+  doc.setFontSize(subSize);
+  doc.text(coverSubtitle, coverCenterX, coverCenterY + 14, { align:'center' });
+
+  doc.addPage();
+  doc.setFont(undefined,'normal');
+
+  doc.setFillColor(...accentRGB);
+  doc.rect(0,0,297,3,'F');
+  doc.setTextColor(...accentRGB);
+  doc.setFontSize(16);
+  doc.setFont(undefined,'bold');
+  doc.text(`LAPORAN KERJA HARIAN ${deptLabel.toUpperCase()}`, 14, 14);
+  doc.setTextColor(100,100,100);
+  doc.setFontSize(10);
+  doc.setFont(undefined,'normal');
+  doc.text(`Prima Mill  |  ${monthLabel || 'Semua Periode'}  |  Total: ${data.length} records`, 14, 22);
+  doc.setTextColor(150,150,150);
+  doc.setFontSize(9);
+  doc.text(`Dicetak: ${new Date().toLocaleString('id-ID')}`, 220, 22);
+  doc.setDrawColor(220,220,220);
+  doc.line(14, 26, 283, 26);
+
+  const rows = data.map((r) => [
+    formatTanggalShort(r['Tanggal']),
+    r['Nama']||'',
+    r['Lokasi']||'',
+    r['Pekerjaan']||'',
+    `${formatJam(r['Jam Mulai'])} - ${formatJam(r['Jam Selesai'])}${r['Durasi']?' ('+r['Durasi']+')':''}`,
+    r['Material']||'',
+    r['QTY']||'',
+    r['UOM']||'',
+    r['Status']||'',
+    r['Remarks']||'',
+  ]);
+
+  // A4 landscape = 297mm wide. Usable = 297 - 14 - 14 = 269mm
+  // Col widths must sum to exactly 269mm so table fills the page perfectly
+  // #:9 | Tgl:22 | Nama:24 | Lokasi:18 | Pekerjaan:68 | Jam:30 | Material:28 | QTY:10 | UOM:10 | Status:20 | Remarks:30 = 269
+  const marginLR = 14;
+  const tableW   = doc.internal.pageSize.getWidth() - marginLR * 2; // 269mm
+
+  function drawSignatureBlock(doc) {
+    const pH = doc.internal.pageSize.getHeight();
+    const pW = doc.internal.pageSize.getWidth();
+    const sigY = pH - 38;
+    const cols = [
+      { label: 'Dibuat Oleh,',    name: 'Suti Rahmat',          jabatan: deptLabel + ' Staff' },
+      { label: 'Diperiksa Oleh,', name: 'Mhd. Fadhlan Siregar', jabatan: 'Mill Engineer' },
+      { label: 'Disetujui Oleh,', name: 'Agung Prastyo',        jabatan: 'Act Mill Manager' },
+    ];
+    const colWidth = pW / 3;
+    cols.forEach((col, i) => {
+      const cx = colWidth * i + colWidth / 2;
+      doc.setFontSize(9); doc.setFont(undefined,'normal'); doc.setTextColor(40,40,40);
+      doc.text(col.label, cx, sigY, { align:'center' });
+      const lineLen = 55;
+      doc.setDrawColor(40,40,40); doc.setLineWidth(0.3);
+      doc.line(cx-lineLen/2, sigY+18, cx+lineLen/2, sigY+18);
+      doc.setFontSize(9); doc.setFont(undefined,'bold'); doc.setTextColor(40,40,40);
+      doc.text(col.name, cx, sigY+17, { align:'center' });
+      doc.setFont(undefined,'normal'); doc.setFontSize(9);
+      doc.text(col.jabatan, cx, sigY+23, { align:'center' });
+    });
+    doc.setTextColor(40,40,40);
+  }
+
+  doc.autoTable({
+    startY: 32,
+    head:[['Tanggal','Nama','Lokasi','Pekerjaan','Jam','Material','QTY','UOM','Status','Remarks']],
+    body: rows,
+    theme:'grid',
+    styles:{
+      fontSize:7.5, textColor:[30,30,30], lineColor:[200,200,200], lineWidth:0.2,
+      overflow:'linebreak', cellPadding:{top:3,right:3,bottom:3,left:3},
+      valign:'top', halign:'left',
+    },
+    headStyles:{
+      fillColor: accentRGB, textColor:[255,255,255], fontSize:8, fontStyle:'bold',
+      halign:'center', valign:'middle',
+    },
+    bodyStyles:{fillColor:[255,255,255], textColor:[40,40,40]},
+    alternateRowStyles:{fillColor:[248,250,252]},
+    columnStyles:{
+      0:{cellWidth:22, halign:'center'},
+      1:{cellWidth:24},
+      2:{cellWidth:18},
+      3:{cellWidth:77, overflow:'linebreak'},
+      4:{cellWidth:30, halign:'center'},
+      5:{cellWidth:28, overflow:'linebreak'},
+      6:{cellWidth:10, halign:'center'},
+      7:{cellWidth:10, halign:'center'},
+      8:{cellWidth:20, halign:'center'},
+      9:{cellWidth:30, overflow:'linebreak'},
+    },
+    tableWidth: tableW,
+    margin:{left:marginLR, right:marginLR, bottom:45},
+    didDrawPage: function() { drawSignatureBlock(doc); },
+  });
+
+  const fname = `Laporan_${deptLabel}${month?'_'+month:''}.pdf`;
+  doc.save(fname);
+  showToast(`File ${fname} berhasil diunduh!`, 'success');
+}
+
+// ══════════════════════════════════════════
+//  API HELPERS
+// ══════════════════════════════════════════
+async function apiGet(params={}) {
+  const url = new URL(API_URL);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, String(v ?? '')));
+  url.searchParams.set('t', Date.now());
+  const res  = await fetch(url.toString(), {cache:'no-store'});
+  const text = await res.text();
+  if (!text || !text.trim()) throw new Error('Response kosong dari Apps Script');
+  if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+    throw new Error('Apps Script belum di-update ke v5. Klik ⚙ Setup Database → Copy kode → Deploy New Version.');
+  }
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch(e) { throw new Error('Response bukan JSON: ' + text.slice(0,80)); }
+  if (parsed.status === 'error') throw new Error(parsed.msg || 'Apps Script error');
+  return parsed;
+}
+
+async function apiPost(body) {
+  const res = await fetch(API_URL, {
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed.status === 'error') throw new Error(parsed.msg || 'Apps Script error');
+    return parsed;
+  } catch(e) {
+    if (text.includes('<html')) throw new Error('Apps Script perlu di-update. Klik ⚙ Setup Database.');
+    throw new Error('Response tidak valid: ' + text.slice(0,100));
+  }
+}
+
+// ══════════════════════════════════════════
+//  SETUP MODAL
+// ══════════════════════════════════════════
+function openSetup(){
+  if (API_URL) document.getElementById('api-url-input').value = API_URL;
+  document.getElementById('setup-modal').classList.add('open');
+}
+function closeSetup(){ document.getElementById('setup-modal').classList.remove('open'); }
+
+async function saveApiUrl() {
+  const url = document.getElementById('api-url-input').value.trim();
+  if (!url || !url.startsWith('https://script.google.com')) {
+    showToast('URL tidak valid. Harus dari script.google.com','error'); return;
+  }
+  showLoading('Testing koneksi...');
+  try {
+    const old = API_URL;
+    API_URL = url;
+    const dept = currentUser ? USERS[currentUser].dept : 'electrical';
+    const res = await apiGet({action:'getAll', dept});
+    if (res.status === 'ok') {
+      localStorage.setItem('app_api_url', url);
+      updateConnStatus();
+      showToast('Koneksi berhasil! Database terhubung ✓','success');
+      closeSetup();
+      allData = res.data || [];
+      filterData(); updateStats();
+    } else {
+      API_URL = old;
+      throw new Error(res.msg || 'Response tidak valid');
+    }
+  } catch(e) {
+    API_URL = localStorage.getItem('app_api_url') || '';
+    showToast('Koneksi gagal: ' + e.message,'error');
+  }
+  hideLoading();
+}
+
+// ══════════════════════════════════════════
+//  DIAGNOSTIC
+// ══════════════════════════════════════════
+async function runDiagnostic() {
+  if (!API_URL) { showToast('Isi URL Apps Script dulu!','error'); return; }
+  showLoading('Menjalankan diagnostik...');
+  const dept = currentUser ? USERS[currentUser].dept : 'electrical';
+  const results = [];
+  try {
+    const r = await apiGet({action:'test', dept});
+    results.push('✅ TEST: ' + (r.msg || 'OK'));
+  } catch(e) { results.push('❌ TEST: ' + e.message); }
+  try {
+    const r = await apiGet({action:'getAll', dept});
+    results.push('✅ GETALL: ' + (r.data ? r.data.length + ' baris' : 'OK'));
+  } catch(e) { results.push('❌ GETALL: ' + e.message); }
+  try {
+    const r = await apiGet({
+      action:'edit', dept, _row:2,
+      fID:'TEST', fTgl:'2026-01-01', fNama:'TEST',
+      fLok:'', fPek:'Test edit', fJm:'08:00', fJs:'09:00',
+      fDur:'1j', fSts:'Selesai', fMat:'', fQty:'', fUom:'', fRem:''
+    });
+    results.push('✅ EDIT: ' + JSON.stringify(r));
+  } catch(e) { results.push('❌ EDIT: ' + e.message); }
+  try {
+    await apiGet({action:'delete', dept, _row:999999});
+    results.push('✅ DELETE endpoint: OK');
+  } catch(e) { results.push('⚠️ DELETE: ' + e.message); }
+  hideLoading();
+  alert('HASIL DIAGNOSTIK (dept: ' + dept + '):\n\n' + results.join('\n') +
+    '\n\n— Jika semua ✅ → Apps Script v5 sudah benar\n— Jika ada ❌ → Apps Script perlu di-update & deploy ulang');
+}
+
+function copyCode() {
+  const code = document.getElementById('gs-code').textContent;
+  navigator.clipboard.writeText(code).then(() => showToast('Kode berhasil dicopy!','success'));
+}
+
+// ══════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════
+function showToast(msg, type='info') {
+  const el   = document.getElementById('toast');
+  const icon = document.getElementById('toast-icon');
+  document.getElementById('toast-msg').textContent = msg;
+  el.className = `show ${type}`;
+  const icons = {
+    success:'<polyline points="20 6 9 17 4 12"/>',
+    error:  '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+    info:   '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+  };
+  icon.innerHTML = icons[type] || icons.info;
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { el.className = ''; }, 3500);
+}
+
+function showLoading(msg='Memproses...'){
+  document.getElementById('loading-msg').textContent = msg;
+  document.getElementById('loading').classList.add('show');
+}
+function hideLoading(){ document.getElementById('loading').classList.remove('show'); }
+
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) {
+      el.classList.remove('open');
+      if (el.id === 'del-modal') deleteRow = null;
+    }
+  });
+});
+</script>
+</body>
+</html>
